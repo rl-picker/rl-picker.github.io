@@ -19,16 +19,16 @@ Here is an example how to set the status of `"Policy-based"` methods to `"reject
 
 ### Software design decisions
 If you want to suggest refactoring, please consider that our priorities are:
-- code that is easy to understand, maintain, and run
-- speed
-- privacy
-- support for old browsers for important functionality
+- code that is easy to understand, maintain, and run,
+- speed,
+- privacy,
+- support for old browsers for important functionality,
 
 and we therefore prefer:
-- no interactive communication with servers, no server-side code generation
-- no need to install anything, no dependencies on third-party libraries
-- static HTML for the table of algorithms
-- interactivity through CSS (e.g. `:hover`) when possible rather than JS
-- no polyfills especially for unimportant functionality
-- embedded scripts and styles instead of dependencies between separate files
+- no interactive communication with servers, no server-side code generation,
+- no need to install anything, no dependencies on third-party libraries,
+- static HTML for the table of algorithms,
+- interactivity through CSS (e.g. `:hover`) when possible rather than JS,
+- no polyfills especially for unimportant functionality,
+- embedded scripts and styles instead of dependencies between separate files.
 
