@@ -1,1 +1,1737 @@
-<script> document.write("Hello, World! v2"); </script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RL-Picker - Reinforcement-learning algorithm picker</title>
+  <!-- TODO include screenshot.png, see e.g. https://www.linkedin.com/help/linkedin/answer/a521928 -->
+  <meta property='og:title' content='RL-Picker - Reinforcement-learning algorithm picker'/>
+  <meta property='og:image' content='screenshot.png'/>
+  <meta property='og:description' content='To select appropriate reinforcement-learning algorithms, fill out the questionnaire'/>
+  <meta property='og:url' content='https://rl-picker.github.io/'/>
+  <!-- TODO middle click on "Reload current page" in Firefox seem to run update() only before Firefox checks the same radio buttons as in the original tab, so run update() some time later or report a bug to Firefox -->
+
+<!----------------------
+  1. VISUAL STYLE
+  ---------------------->
+
+<style>
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 100%; /* fallback for browsers that don't support the formula below */
+  /*font-size: calc(50% + 0.5vw); /* https://stackoverflow.com/q/14431411/ */
+}
+
+/* TODO stripes with `background-attachment: fixed` https://css-tricks.com/stripes-css/ */
+
+th, td {
+  padding: 5px;
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+/* https://stackoverflow.com/q/9670075/#17117992 */
+/*
+td, div {
+  transition: all 1s linear;
+  transition-property: background-color, color;
+}
+*/
+table {
+  border-collapse: collapse;
+}
+tr:has(td.combination-a):has(td.combination-a-minus0dot1) > td.combination-a:not(.disfavored),
+tr:has(td.combination-a):has(td.combination-a-minus0dot1) > td.combination-a-minus0dot1:not(.disfavored),
+tr:has(td.combination-a):has(td.combination-a-minus0dot1) > td.combination-a:not(.disfavored) > div:first-of-type,
+tr:has(td.combination-a):has(td.combination-a-minus0dot1) > td.combination-a-minus0dot1:not(.disfavored) > div:first-of-type,
+.tooltip .combination-a,
+.tooltip .combination-a-minus0dot1 {
+  background: repeating-linear-gradient(
+    90deg,
+    #fff,
+    #fff 10px,
+    hsl(44, 100%, 96%) 10px,
+    hsl(44, 100%, 96%) 20px
+  );
+  background-attachment: fixed;
+}
+tr:has(td.combination-a):has(td.combination-a-minus0dot2) > td.combination-a:not(.disfavored),
+tr:has(td.combination-a):has(td.combination-a-minus0dot2) > td.combination-a-minus0dot2:not(.disfavored),
+tr:has(td.combination-a):has(td.combination-a-minus0dot2) > td.combination-a:not(.disfavored) > div:first-of-type,
+tr:has(td.combination-a):has(td.combination-a-minus0dot2) > td.combination-a-minus0dot2:not(.disfavored) > div:first-of-type,
+.tooltip .combination-a,
+.tooltip .combination-a-minus0dot2 {
+  background: repeating-linear-gradient(
+    90deg,
+    #fff,
+    #fff 10px,
+    hsl(44, 100%, 93%) 10px,
+    hsl(44, 100%, 93%) 20px
+  );
+  background-attachment: fixed;
+}
+.disfavored, .disfavored > *, .disfavored-legend {
+  background-color: hsl(44, 100%, 85%);
+}
+/* First column of rejected rows */
+tr:has(td.rejected) > td:first-of-type,
+tr:has(td.rejected) > td:first-of-type > div:first-of-type {
+  /* tr:has(td.rejected) > td:first-child */
+  background-color: #aa0000 !important;
+  color: white;
+  text-decoration: line-through;
+}
+/* First column of disfavored rows, with color depending on the number of disfavored method properties */
+tr:has(td.disfavored) > td:first-of-type,
+tr:has(td.disfavored) > td:first-of-type > div:first-of-type {
+  background-color: hsl(44, 100%, 85%);
+}
+tr:has(td.disfavored ~ td.disfavored) > td:first-of-type,
+tr:has(td.disfavored ~ td.disfavored) > td:first-of-type > div:first-of-type {
+  background-color: hsl(44, 90%, 65%)
+}
+tr:has(td.disfavored ~ td.disfavored ~ td.disfavored) > td:first-of-type,
+tr:has(td.disfavored ~ td.disfavored ~ td.disfavored) > td:first-of-type > div:first-of-type {
+  background-color: hsl(44, 80%, 50%)
+}
+tr:has(td.disfavored ~ td.disfavored ~ td.disfavored ~ td.disfavored) > td:first-of-type,
+tr:has(td.disfavored ~ td.disfavored ~ td.disfavored ~ td.disfavored) > td:first-of-type > div:first-of-type {
+  background-color: hsl(44, 70%, 40%)
+}
+
+tr:has(td.combination-a):has(td.combination-a-minus0dot1) > td:first-of-type,
+tr:has(td.combination-a):has(td.combination-a-minus0dot1) > td:first-of-type > div:first-of-type {
+  background-color: hsl(44, 100%, 96%);
+}
+tr:has(td.disfavored):has(td.combination-a):has(td.combination-a-minus0dot1) > td:first-of-type,
+tr:has(td.disfavored):has(td.combination-a):has(td.combination-a-minus0dot1) > td:first-of-type > div:first-of-type {
+  background-color: hsl(44, 97%, 77%);
+}
+tr:has(td.disfavored ~ td.disfavored):has(td.combination-a):has(td.combination-a-minus0dot1) > td:first-of-type,
+tr:has(td.disfavored ~ td.disfavored):has(td.combination-a):has(td.combination-a-minus0dot1) > td:first-of-type > div:first-of-type {
+  background-color: hsl(44, 87%, 60%);
+}
+tr:has(td.disfavored ~ td.disfavored ~ td.disfavored):has(td.combination-a):has(td.combination-a-minus0dot1) > td:first-of-type,
+tr:has(td.disfavored ~ td.disfavored ~ td.disfavored):has(td.combination-a):has(td.combination-a-minus0dot1) > td:first-of-type > div:first-of-type {
+  background-color: hsl(44, 77%, 47%);
+}
+
+tr:has(td.combination-a):has(td.combination-a-minus0dot2) > td:first-of-type,
+tr:has(td.combination-a):has(td.combination-a-minus0dot2) > td:first-of-type > div:first-of-type {
+  background-color: hsl(44, 100%, 93%);
+}
+tr:has(td.disfavored):has(td.combination-a):has(td.combination-a-minus0dot2) > td:first-of-type,
+tr:has(td.disfavored):has(td.combination-a):has(td.combination-a-minus0dot2) > td:first-of-type > div:first-of-type {
+  background-color: hsl(44, 93%, 73%);
+}
+tr:has(td.disfavored ~ td.disfavored):has(td.combination-a):has(td.combination-a-minus0dot2) > td:first-of-type,
+tr:has(td.disfavored ~ td.disfavored):has(td.combination-a):has(td.combination-a-minus0dot2) > td:first-of-type > div:first-of-type {
+  background-color: hsl(44, 83%, 60%);
+}
+tr:has(td.disfavored ~ td.disfavored ~ td.disfavored):has(td.combination-a):has(td.combination-a-minus0dot2) > td:first-of-type,
+tr:has(td.disfavored ~ td.disfavored ~ td.disfavored):has(td.combination-a):has(td.combination-a-minus0dot2) > td:first-of-type > div:first-of-type {
+  background-color: hsl(44, 73%, 43%);
+}
+
+td > div {
+  background-color: white;
+}
+.rejected, .rejected > *, .rejected-legend, input:checked ~ span span.rejected-radiobutton {
+  background-color: #aa0000;
+  color: white;
+}
+tr:has(td.rejected) > td:first-of-type a {
+  color: white;
+  text-decoration: line-through underline;
+}
+.tooltip {
+  text-decoration: none;
+  color: initial;
+}
+.tooltip .rejected {
+  text-decoration: none;
+}
+/*
+tr:has(td.rejected) {
+  display: none;
+}
+*/
+.hiddenMethod td {
+  display: none;
+}
+
+/* TODO after choosing colors, replace `hsl()` etc by old notation for compatibility with older browsers */
+
+fieldset {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color: hsl(210 40% 92%);
+}
+legend {
+  border: 1px solid black;
+  padding: 5px;
+  background-color: hsl(210 40% 75%);
+}
+
+/* `:invalid` doesn't work as desired for nested `fieldset`s, but it supports older browsers than `:has()`, so we use both. */
+/* A more thorough workaround for older browsers may use JS. */
+:invalid, fieldset:not(:has(:checked)) {
+  background-color: #ffe5eb;
+}
+:invalid > legend, fieldset:not(:has(:checked)) > legend {
+  background-color: #ffaaaa;
+}
+
+/* Chrome has a bug: text slightly moves
+label:hover, :hover + label {
+  background-color: #dddddd;
+}
+*/
+.help {
+  /*background-color: #00ff00;*/
+  /*border-radius: 5px;*/
+}
+.hidden {
+  display: none;
+}
+
+/* TODO http://www.menucool.com/tooltip/css-tooltip */
+/* https://stackoverflow.com/q/22549505/, use the code in the question, not the answer, so that the user can click on links in the tooltip */
+td:hover .tooltip, td:hover .duct-tape {
+  /*display: block;*/ visibility: visible;
+}
+/*
+tr:hover {
+  background-color: #c8c8c8;
+}
+*/
+/* adding `tr:has(td.rejected) > td:hover` because `td:hover` doesn't override the `tr:has(td.rejected) > td:first-of-type` above */
+/* https://stackoverflow.com/q/4011113/#13996191 */
+.tooltip, .duct-tape, td:hover, tr:has(td.rejected) > td:hover {
+  background-color: #999999;
+}
+/* prevent grey hover highlight in first column */
+/*
+td:first-child {
+  background-color: transparent;
+}
+*/
+/*
+td:hover > div:first-of-type {
+  outline: 1px solid black;
+  box-shadow: inset 5px 5px 5px rgba(0,0,0,0.5);
+}
+*/
+/*
+td:hover, .tooltip{
+  outline: 3px solid black;
+}
+*/
+.tooltip > div {
+  margin: 5px;
+  /*padding-bottom: 15px;*/
+  /*background: none;*/ /* why did we have this? this kind of made the divForPadding in earlier versions necessary */
+}
+.tooltip > div/*, td > div:first-child*/ {
+  padding: 5px;
+}
+.tooltip, .duct-tape {
+  /*display: none;*/ visibility: hidden;
+  position: absolute;
+  top: 100%;
+  left: 0;
+}
+.tooltip {
+  /*padding: 10px;*/
+  z-index: 1000;
+  border: 1px solid black;
+  border-left: none;
+  /*border-top: none;*/
+  border-radius: 0 15px 15px 15px;
+  /* min-width only works as intended if padding:0; that's ok because divs inside the tooltip have margins anyway */
+  /* min-width: 100%; for browsers that don't support calc(100% + 15px) */
+  /* min-width: calc(100% + 15px); 15px equals border-radius */
+  /* the min-width seems to be for fitting the text and border radius, but I don't remember why that was necessary, it seems to work anyway */
+  width: 30em;
+  max-width: 100vw;
+}
+td:nth-child(4) > .tooltip, td:nth-child(3) > .tooltip {
+  width: 40em;
+}
+.tooltip, td:hover {
+  box-shadow: 5px 5px 5px rgba(0,0,0,0.5);
+  /* box-shadow: 0 0 10px rgba(0,0,0,0.5); */
+  z-index: 1000;
+}
+.duct-tape{
+  z-index: 1001;
+  width: 100%;
+  height: 1px;
+}
+/* to prevent tooltips from exceeding the left/right page borders, the 5 rightmost tooltips are right-aligned */
+td + td + td + td + td + td > .tooltip { /* https://stackoverflow.com/q/11922165/#14306148 */
+  left: auto;
+  right: 0;
+  border-left: 1px solid black;
+  border-right: none; /* causes weird right rounded corner, but that's better than a double border or something like right:calc(0% - 1px) (that's simply -1px though! and that looks different for different columns :( ) with questionable compatibility */
+  border-radius: 15px 0 15px 15px;
+}
+td:has(.tooltip) {
+  cursor: help;
+}
+.tooltip {
+  cursor: auto;
+}
+td {
+  position: relative; /* so that right:100% works for .tooltip */
+}
+
+/* wrapped label text shouldn't be under the radio button https://stackoverflow.com/q/7690065/#33128709 */
+label { display:table-row; }
+label > span { display:table-cell; }
+/* prevent the clickable area from depending on the width of other options in the same fieldset and being inconsistent across different fieldsets */
+label > span { width: 100% }
+
+/* TODO replace :not() by older syntax: first style all like unchecked ones, then style checked ones https://stackoverflow.com/q/8846075#30379525 */
+/* unlike `... fieldset{display:none}`, the following solution prevents a layout shift */
+input:not(:checked) ~ span > fieldset {
+  visibility: hidden;
+}
+input:not(:checked) ~ span > fieldset, input:not(:checked) ~ span > fieldset legend {
+  height: 0;
+  /*transform: scaleY(0);*/
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  border: 0; /* comment this out if we display a small `legend` as below */
+}
+
+/* Display a small `legend` to indicate that there will be a bonus question. Blue because hidden questions don't need answers. */
+/*
+input:not(:checked) ~ span > fieldset > legend {
+  visibility: visible;
+  height: 10px;
+  background-color: hsl(210 40% 75%);
+}
+input:not(:checked) ~ span > fieldset > legend > span {
+  visibility: hidden;
+}
+*/
+
+fieldset, legend {
+  transition: margin 0.1s linear, padding 0.1s linear/*, transform 0.1s linear*/;
+  /* https://stackoverflow.com/q/3508605/ */
+}
+
+span.equation-inline {
+  white-space: nowrap;
+  /* background-color: #f0f; */
+}
+span.equation-display {
+  white-space: nowrap;
+  /* https://stackoverflow.com/q/16489937/#16490068 */
+  display: table;
+  margin: 0 auto;
+}
+
+fieldset {
+  max-width: 80vw;
+}
+
+@media screen and (orientation: landscape) {
+  .smartphone {
+    display: none;
+  }
+}
+
+</style>
+</head>
+<body>
+<div style="display: flex; flex-wrap: wrap; gap: 10px;">
+
+  <!----------------------
+    2. QUESTIONNAIRE
+    ---------------------->
+
+  <div style="flex: 1;">
+    <h1>RL-Picker</h1>
+    <h2 class="smartphone" style="color: #ff7777">Please view this page on a large screen</h2>
+    <p>To select appropriate reinforcement-learning algorithms, reply to as many of the following questions as possible:</p>
+    <label><input type="checkbox" name="hide" id="hide" /><span>Hide <span class="rejected-legend">inappropriate algorithms</span> instead of marking them red</span></label>
+    <p><span class="disfavored-legend">Less preferred algorithms</span> will be marked yellow</p>
+    
+    <!-- is `value` attribute needed for `input` tags? -->
+    
+    <fieldset><legend>Environment dynamics consisting of reward function <span class="equation-inline"><i>r</i></span> and state-transition probability <span class="equation-inline"><i>p</i>(<i>s</i>'|<i>s</i>,<i>a</i>)</i></span></legend>
+      <label><input type="radio" name="dynamics" id="dynamicsLearnable" required /><span>Not given, but feasible to learn<br />
+        <fieldset>
+          <legend><span>Primary goal/concern of the learning process</span></legend>
+          <label><input type="radio" name="goal" id="goalStabilityEtc" /><span>Training stability and/or asymptotic performance</span></label>
+          <label><input type="radio" name="goal" id="goalDataEfficiencyEtc" /><span>Data efficiency, transfer learning, safety, and/or explainability</span></label>
+        </fieldset>
+      </span></label>
+      <label><input type="radio" name="dynamics" id="dynamicsNotLearnable" required /><span>Neither given nor feasible to learn (e.g. chaotic)</span></label>
+      <label><input type="radio" name="dynamics" id="dynamicsGiven" required /><span>Given<!-- <button onclick="help(this)">?</button><span class="help hidden">[TODO explain]</span>--></span></label>
+    </fieldset>
+    
+    <fieldset><legend>Action sequences</legend>
+      <label><input type="radio" name="actionSequences" id="actionSequencesComplex" required /><span>Complex or hierarchically divisible into sub-routines</span></label>
+      <label><input type="radio" name="actionSequences" id="actionSequencesModeratelyComplex" required /><span>Simple or moderately complex</span></label>
+    </fieldset>
+    
+    <fieldset><legend>Expert</legend>
+      <label><input type="radio" name="expert" id="expertUnavailable" required /><span>Not available<!-- <button onclick="help(this)">?</button><span class="help hidden">[TODO explain]</span>--></span></label>
+      <label><input type="radio" name="expert" id="expertAvailable" required /><span>Available<!-- <button onclick="help(this)">?</button><span class="help hidden">[TODO explain]</span>--></span></label>
+    </fieldset>
+    
+    <fieldset><legend>Computational resources for running several agents in parallel during training</legend>
+      <label><input type="radio" name="parallel" id="parallelUnavailable" required /><span>Not available</span></label>
+      <label><input type="radio" name="parallel" id="parallelAvailable" required /><span>Available</span></label>
+    </fieldset>
+    
+    <fieldset><legend>Estimate the "risk" of taking certain actions?</legend>
+      <label><input type="radio" name="risk" id="estimateRisk" required /><span>Yes please</span></label>
+      <label><input type="radio" name="risk" id="noNeedToEstimateRisk" required /><span>Not necessary</span></label>
+    </fieldset>
+    
+    <fieldset><legend>Which of the following is more important?</legend>
+      <label><input type="radio" name="eeeOrStability" id="eee" required /><span>Good exploration (e.g. because most actions are bad) and/or efficient use of experience (e.g. because acquiring new experience is expensive)</span></label>
+      <label><input type="radio" name="eeeOrStability" id="stability" required /><span>Training stability</span></label>
+    </fieldset>
+    
+    <!-- for Tables 7, 12, 13, 16 -->
+    <fieldset>
+      <legend><span>Rewards</span></legend>
+      <label><input type="radio" name="rewards" id="rewardsGood" /><span>Non-deceptive and quite dense</span></label>
+      <label><input type="radio" name="rewards" id="rewardsBadOrUnclear" /><span>Sparse, deceptive, or unclear in advance<br /><small>(in this case, a <span class="rejected-radiobutton">deterministic target policy</span> shouldn’t be used <button onclick="help(this)">...</button><span class="help hidden"> because deterministic policies might not work well if rewards are sparse, even if the optimal policy is deterministic [<a href="https://arxiv.org/abs/1911.11679" target="_blank">Matheron et al. 2019</a>], and because randomness increases robustness against deceptive rewards and/or local minima [<a href="https://arxiv.org/abs/1905.06893" target="_blank">Mazoure et al. 2019</a>]</span>)</small></span></label>
+    </fieldset>
+    
+    <fieldset><legend>Is the optimal policy probably stochastic?</legend>
+      <label><input type="radio" name="optimalPolicy" id="optimalPolicyProbablyStochastic" required /><span>Yes (e.g. important information is not fully observable or a deterministic behavior can be exploited by adversaries)<br /><small>(in this case, a <span class="rejected-radiobutton">deterministic target policy</span> shouldn’t be used because it cannot model stochastic behavior)</small></span></label>
+      <label><input type="radio" name="optimalPolicy" id="optimalPolicyProbablyDeterministic" required /><span>No</span></label>
+    </fieldset>
+    
+    <fieldset><legend>Is estimating the benefit (value) of each possible action considerably more difficult than selecting the best action?</legend>
+      <label><input type="radio" name="value" id="valueMoreComplex" required /><span>Yes, e.g. it is easier to steer a car well than to estimate the exact risks of each possible steering action</span></label>
+      <label><input type="radio" name="value" id="valueNotMoreComplex" required /><span>No</span></label>
+    </fieldset>
+    
+    <fieldset><legend>Duration of an episode</legend>
+      <label><input type="radio" name="duration" id="durationShort" required /><span>Always short</span></label>
+      <label><input type="radio" name="duration" id="durationLong" required /><span>Sometimes/always long</span></label>
+    </fieldset>
+    
+    <!-- TODO Maybe use checkboxes instead of radio buttons here, so that the user can try all promising algorithms when unsure about the action-space size category. But make it clear that it's multiple-choice. -->
+    <fieldset><legend>Action space</legend>
+      <label><input type="radio" name="actionSpace" id="actionSpaceVerySmall" required /><span>Discrete and very small<br />
+        <fieldset><legend>State space</legend>
+          <label><input type="radio" name="stateSpace" id="stateSpaceVerySmall" required /><span>Discrete and very small</span></label>
+          <label><input type="radio" name="stateSpace" id="stateSpaceNotVerySmall" required /><span>Not very small</span></label>
+        </fieldset>
+      </span></label>
+      <label><input type="radio" name="actionSpace" id="actionSpaceSmall" required /><span>Discrete and small</span></label>
+      <label><input type="radio" name="actionSpace" id="actionSpaceLarge" required /><span>Large discrete or low-dimensional continuous</span></label>
+      <label><input type="radio" name="actionSpace" id="actionSpaceVeryLarge" required /><span>Very large discrete or high-dimensional continuous</span></label>
+    </fieldset>
+    
+    <fieldset><legend>Important information from past observations</legend>
+      <label><input type="radio" name="pastObservations" id="pastObservationsImportant" required /><span>May become unobservable (i.e. past observations need to be taken into account)</span></label>
+      <label><input type="radio" name="pastObservations" id="pastObservationsNotImportant" required /><span>Remains observable (i.e. past observations do not contain additional important information compared to the current observation)</span></label>
+    </fieldset>
+    
+    
+    <p>Unlike the questions above regarding what is dictated by the environment, the following question is about your planned choice of method properties:</p>
+    <fieldset><legend>What target policy will you choose?</legend>
+      <label><input type="radio" name="targetPolicy" id="targetPolicyStochastic" required /><span>Stochastic</span></label>
+      <label><input type="radio" name="targetPolicy" id="targetPolicyDeterministic" required /><span>Deterministic<small id="targetPolicyDeterministicRejected" style="display:none;"><br />(see the red text "<span class="rejected-legend">deterministic target policy</span>" above regarding why this choice is unavailable)</small></span></label>
+    </fieldset>
+    
+    
+    <p>For selecting a parametric probablity distribution for actions, see Section 3 in <a href="https://arxiv.org/search/?searchtype=author&query=Bongratz%2C+F" target="_blank">the full paper</a>.</p>
+  </div>
+
+  <!----------------------
+    3. ALGORITHM-SELECTION RULES
+    ---------------------->
+
+<script>
+const eligibilityTracesNStep = [
+  "TD(n)",
+  "TD(λ)",
+  "LSTD-Q(λ)",
+  "Q(λ)",
+  "SARSA(λ)",
+  "TB(λ)",
+  "ET(λ)",
+  "GAE(λ)",
+  "Retrace(λ)",
+  "GTD(λ)",
+  "V-trace(n)"
+];
+
+function update() {
+  // delete explanations of rejections from tooltips
+  document.querySelectorAll('.tooltip .rejected').forEach(element => element.remove());
+  document.querySelectorAll('.tooltip .disfavored').forEach(element => element.remove());
+  document.querySelectorAll('.tooltip .combination-a').forEach(element => element.remove());
+  document.querySelectorAll('.tooltip .combination-a-minus0dot1').forEach(element => element.remove());
+  document.querySelectorAll('.tooltip .combination-a-minus0dot2').forEach(element => element.remove());
+  // TODO do the same for new classes such as .jointly-disvavored
+
+  // remove CSS classes
+  removeClass("rejected", "rejected");
+  removeClass("hiddenMethod", "hiddenMethod");
+  removeClass("disfavored", "disfavored");
+  removeClass("combination-a", "combination-a");
+  removeClass("combination-a-minus0dot1", "combination-a-minus0dot1");
+  removeClass("combination-a-minus0dot2", "combination-a-minus0dot2");
+  // TODO do the same for new classes such as .jointly-disvavored
+  
+  
+  // assign CSS classes to table cells depending on checked radio buttons
+  
+  // Environment dynamics (and primary goal) -> model-based or model-free
+  if (document.getElementById("dynamicsLearnable").checked && document.getElementById("goalStabilityEtc").checked) {
+    rejectOrDisfavor("Model-based", "disfavored", 'There exist algorithms that incorporate a learned model while maintaining good training stability and delivering excellent results, e.g. MuZero. This indicates that model-based approaches can work well for the described situation. However, learning an environment model simultaneously with a policy may increase the risk of training instability and could lower asymptotic performance [<a href="https://arxiv.org/abs/2006.16712" target="_blank">Moerland et al. 2020b</a>], which probably gives model-based approaches a lower priority in the described situation. (You selected: environment dynamics are fasible to learn; the primary goals are training stability and/or asymptotic performance.)');
+  }
+  if (document.getElementById("dynamicsLearnable").checked && document.getElementById("goalDataEfficiencyEtc").checked) {
+    rejectOrDisfavor("Model-free", "rejected", 'A model-based approach should be preferred instead because it helps to increase data efficiency in the training process and it is also known to be beneficial in the context of transfer learning, safety guarantees, and explainability of the algorithm [<a href="https://arxiv.org/abs/2006.16712" target="_blank">Moerland et al. 2020b</a>, <a href="https://arxiv.org/abs/2008.05598" target="_blank">Plaat et al. 2020</a>, <a href="https://arxiv.org/abs/2011.04021" target="_blank">Hamrick et al. 2020</a>]. (You selected: environment dynamics are fasible to learn; the primary goals data efficiency, transfer learning, safety, and/or explainability.)');
+  }
+  if (document.getElementById("dynamicsNotLearnable").checked) {
+    rejectOrDisfavor("Model-based", "rejected", "In an environment where learning a model is infeasible, only a model-free approach is applicable. More precisely, it is to be expected that any model representing such an environment is deficient and, therefore, likely to be misleading. Yet, a good policy might not require knowledge about all of the environmental dynamics and can, hence, potentially be learned with a model-free RL algorithm. (You selected: environment dynamics neither given nor fasible to learn.)");
+  }
+  if (document.getElementById("dynamicsGiven").checked) {
+    rejectOrDisfavor("Model-free", "rejected", 'The information of the environment model is usually beneficial in many regards (e.g. data efficiency, stability) without significant disadvantages if this model is provided in advance [<a href="https://arxiv.org/abs/2006.16712" target="_blank">Moerland et al. 2020b</a>]. If using the given model is computationally expensive or learning a sufficiently good policy does not require knowledge about environmental details, it might be beneficial to work with a simplified version of the given model. (You selected: environment dynamics are given.)');
+  }
+  
+  // Action sequences -> hierarchical methods
+  if (document.getElementById("actionSequencesComplex").checked) {
+    rejectOrDisfavor("Not hierarchical", "rejected", 'Highly complex action sequences can often be described more easily on different hierarchical levels, e.g., for a robot, a high-level action could be “grab the object,” and a low-level sequence of actions could be “move fingers appropriately”. Many methods not primarily designed for hierarchical actions perform poorly when applied to hierarchical tasks [<a href="https://arxiv.org/abs/1604.06778" target="_blank">Duan et al. 2016</a>]. (You selected: action sequences are complex or hierarchically divisible into sub-routines.)');
+  }
+  if (document.getElementById("actionSequencesModeratelyComplex").checked) {
+    rejectOrDisfavor("Hierarchical", "rejected", "A hierarchical approach is probably not very helpful if action sequences are not too complex. Moreover, hierarchical approaches usually require more advanced training procedures and architectures than common RL algorithms. (You selected: action sequences are simple or moderately complex.)");
+  }
+  
+  // Expert -> imitation learning
+  if (document.getElementById("expertUnavailable").checked) {
+    rejectOrDisfavor("Imitation learning", "rejected", "If no expert is available, imitation learning is not possible.");
+  }
+  if (document.getElementById("expertAvailable").checked) {
+    rejectOrDisfavor("Not imitation learning", "rejected", 'Choosing imitation learning instead (i.e. learning from the behavior of an expert) is likely to be beneficial for the training process itself (e.g. better stability, faster convergence) and may improve test performance [<a href="https://arxiv.org/abs/1704.03732" target="_blank">Hester et al. 2017</a>]. The overhead in terms of computation and implementation effort is typically low if expert trajectories are already available. Even though the imitation loss could be removed after some initial pre-training phase, this seems to be sub-optimal [<a href="https://arxiv.org/abs/1704.03732" target="_blank">Hester et al. 2017</a>]. (You selected: an expert is available.)');
+  }
+  
+  // Parallel
+  if (document.getElementById("parallelUnavailable").checked) {
+    rejectOrDisfavor("Distributed", "rejected", "Learning in a distributed manner requires at least enough computational resources to run two actors in parallel. (You selected: computational resources for running several agents in parallel during training are not available.)");
+  }
+  if (document.getElementById("parallelAvailable").checked) {
+    rejectOrDisfavor("Not distributed", "disfavored", "Learning in a distributed manner by acting in multiple environment instances in parallel and exchanging data usually reduces training time. (We assume a training procedure with fixed hyperparameters. On the other hand, during hyperparameter tuning, it might be more efficient to try different hyperparameters on different computation units instead of splitting up each experiment.) Non-distributed algorithms can still be used but are potentially less preferred as running several actors is impossible. (You selected: computational resources for running several agents in parallel during training are available.)");
+  }
+  
+  // Risk
+  if (document.getElementById("estimateRisk").checked) {
+    rejectOrDisfavor("Not distributional", "rejected", 'Due to not estimating a probability distribution over the cumulative reward, non-distributional methods do not allow for a straightforward risk estimation. (You selected that the "risk" of taking certain actions should be estimated.)');
+  }
+  
+  // https://docs.google.com/spreadsheets/d/1aGwDwkaRJGg8L-DU8A3PUrb0J4_APJC6dHHPwE25z7o/edit#gid=0
+  // TODO proofread all possible values of reasonsToRejectDeterministicTargetPolicy in all contexts in which they can be displayed
+  // Initial number of points for combinations of method properties, and text strings with explanations
+  var reasonsToRejectDeterministicTargetPolicy = '';
+  if (document.getElementById("eee").checked) {
+    rejectOrDisfavor("On-policy", "rejected", 'You prioritized good exploration and/or efficient use of experience. On-policy methods cannot add randomness to the target policy to improve exploration. They also cannot re-use past experience in a non-volatile replay buffer to improve sample efficiency.'); // this description is different from the paper because it is about rejecting on-policy methods. TODO add note to off-policy methods that experience replay and prioritization of experience can be tried - only in this case or in all cases?
+  }
+  if (document.getElementById("optimalPolicyProbablyStochastic").checked) {
+    reasonsToRejectDeterministicTargetPolicy += "<br />You selected that the optimal policy is probably stochastic. A deterministic target policy cannot model stochastic behavior. Thus, the target policy must be stochastic.<br />";
+  }
+  if (document.getElementById("rewardsBadOrUnclear").checked) {
+    reasonsToRejectDeterministicTargetPolicy += '<br />The target policy must be stochastic because deterministic policies might not work well if rewards are sparse, even if the optimal policy is deterministic [<a href="https://arxiv.org/abs/1911.11679" target="_blank">Matheron et al. 2019</a>], and because randomness increases robustness against deceptive rewards and/or local minima [<a href="https://arxiv.org/abs/1905.06893" target="_blank">Mazoure et al. 2019</a>]<br />';
+  }
+  if (document.getElementById("optimalPolicyProbablyDeterministic").checked && document.getElementById("rewardsGood").checked) {
+    // do nothing, stochastic and deterministic target policies are both worth trying (see first row of Table 7)
+  }
+  if (document.getElementById("stability").checked) {
+    rejectOrDisfavor("Off-policy", "rejected",  'You prioritized training stability over efficient use of experience. Off-policy methods are usually less stable, especially in combination with function approximation like neural networks [<a href="http://incompleteideas.net/book/the-book-2nd.html" target="_blank">Sutton & Barto 2018</a>: Section 11]. The higher sample efficiency in off-policy methods is not a large advantage if acquiring new experience is cheap.');
+    reasonsToRejectDeterministicTargetPolicy += '<br />In the situation you specified, on-policy methods have to be used. (For the reasons, hover/tap "Off-policy".) On-policy methods shouldn’t be used with a deterministic target policy because that impedes exploration at training time, which is usually undesirable.<br />';
+  }
+  
+  // Table 9
+  const valueBased = [
+    "Tabular value-based with exact maximization",
+    "Non-tabular value-based with exact maximization",
+    "Non-tabular value-based with approximate maximization and fixed search procedure",
+    "Non-tabular value-based with approximate maximization and learned search procedure"
+  ];
+  if (document.getElementById("valueNotMoreComplex").checked) {
+    // if Stochastic preferred or necessary
+    if (reasonsToRejectDeterministicTargetPolicy) {
+      valueBased.forEach((methodProperty) => {
+        rejectOrDisfavor(methodProperty, "disfavored", "Value-based methods have lower priority when the target policy is stochastic (because the variety of stochastic policies realizable in value-based algorithms is limited, e.g. in terms of learnable modes), and the target policy must be stochastic for the following reasons:<br />"+reasonsToRejectDeterministicTargetPolicy);
+      });
+    }
+    // if Deterministic and Stochastic are OK: do nothing, apparently
+  }
+  else if (document.getElementById("valueMoreComplex").checked) {
+    valueBased.forEach((methodProperty) => {
+      rejectOrDisfavor(methodProperty, "rejected", "You specified that estimating the benefit (value) of each possible action is considerably more difficult than selecting the best action. In value-based methods, an accurately learned action-value function is crucial for an optimal policy. In contrast, policy-based and actor-critic methods parameterize the policy directly, which is expected to be simpler in this situation.");
+    });
+  }
+  /* commenting this out for now instead of finishing the "TODO" here because showing early info during incompletely filled-out questionnaires has low priority
+  else { // the user hasn't answered "Is estimating the benefit (value) of each possible action considerably more difficult than selecting the best action?" yet, but we can already disfavor valueBased methods (if reasonsToRejectDeterministicTargetPolicy) because depending on the answer they get either disfavored or even rejected (see the two previous `if` blocks)
+    // see comments for similar code above
+    if (reasonsToRejectDeterministicTargetPolicy) {
+      valueBased.forEach((methodProperty) => {
+        rejectOrDisfavor(methodProperty, "disfavored", reasonsToRejectDeterministicTargetPolicy+'[TODO check whether that makes sense in context], and value-based methods have lower priority when the target policy is stochastic or are even rejected (depending on how you will reply to "Is estimating the benefit (value) of each possible action considerably more difficult than selecting the best action?").');
+      });
+    }
+  }
+  */
+  
+  // Table 10
+  // TODO If episodes are short (as per the radio button) and method is distributional and policy-based, reject that method. This is not yet implemented because the list of methods doesn't contain distributional policy-based methods, as hinted at in the "... because ..." column in our paper.
+  if (document.getElementById("durationLong").checked) {
+    rejectOrDisfavor("Policy-based", "rejected", "Policy-based methods without a learned critic are probably not suited for long episodes since updating parameters only after completed episodes is often inefficient if episodes are long and even impossible for online learning in continuing tasks.");
+  }
+  
+  // Table 11
+  if (document.getElementById("stateSpaceVerySmall").checked && document.getElementById("actionSpaceVerySmall").checked) {
+    [
+      "Non-tabular value-based with exact maximization",
+      "Non-tabular value-based with approximate maximization and fixed search procedure",
+      "Non-tabular value-based with approximate maximization and learned search procedure"
+    ].forEach((methodProperty) => {
+      rejectOrDisfavor(methodProperty, "rejected", 'For very small state and action spaces, all values of the action-value function <i>Q</i>(<i>s</i>,<i>a</i>) can be comuputed and stored in a table. For tabular action-value-based methods (in contrast to non-tabular methods), very good convergence guarantees exist [<a href="https://www.cs.rhul.ac.uk/~chrisw/new_thesis.pdf" target="_blank">Watkins 1989</a>], [<a href="http://incompleteideas.net/book/the-book-2nd.html" target="_blank">Sutton & Barto 2018</a>: Sections 5, 6]. Thus, they should be preferred over non-tabular methods.');
+    });
+  }
+  if (document.getElementById("actionSpaceSmall").checked) {
+    rejectOrDisfavor("Tabular value-based with exact maximization", "rejected", "Since you indicated that the action space is <i>not very small</i>, computing and storing all values of the action-value function <i>Q</i>(<i>s</i>,<i>a</i>) is infeasible.");
+    rejectOrDisfavor("Non-tabular value-based with approximate maximization and fixed search procedure", "disfavored", "An exact maximization over actions is tractable since you indicated that the number of actions is small, and it yields better actions than approximate maximization.");
+    rejectOrDisfavor("Non-tabular value-based with approximate maximization and learned search procedure", "disfavored", "An exact maximization over actions is tractable since you indicated that the number of actions is small, and it yields better actions than approximate maximization.");
+  }
+  if (document.getElementById("actionSpaceLarge").checked) {
+    rejectOrDisfavor("Tabular value-based with exact maximization", "rejected", "Value-based methods with exact maximization over actions are not suited for large action spaces because computing the argmax exactly is often hard.");
+    rejectOrDisfavor("Non-tabular value-based with exact maximization", "rejected", "Value-based methods with exact maximization over actions are not suited for large action spaces because computing the argmax exactly is often hard.");
+    rejectOrDisfavor('Non-tabular value-based with approximate maximization and learned search procedure', "disfavored", 'Value-based methods with approximate maximization over actions and learned search procedure probably receive lower priority since learning an additional function for the search procedure might add overhead to the training procedure without leading to better results in such situations [<a href="https://arxiv.org/abs/2001.08116" target="_blank">Van de Wiele et al. 2020</a>].');
+  }
+  if (document.getElementById("actionSpaceVeryLarge").checked) {
+    rejectOrDisfavor("Tabular value-based with exact maximization", "rejected", "Value-based methods with exact maximization over actions are not suited for large action spaces because computing the argmax exactly is often hard.");
+    rejectOrDisfavor("Non-tabular value-based with exact maximization", "rejected", "Value-based methods with exact maximization over actions are not suited for large action spaces because computing the argmax exactly is often hard.");
+    rejectOrDisfavor("Non-tabular value-based with approximate maximization and fixed search procedure", "rejected", 'Such methods are probably not suited for very large action spaces due to a high consumption of computational resources [<a href="https://arxiv.org/abs/1604.06778" target="_blank">Duan et al. 2016</a>] and/or bad performance in high-dimensional action spaces [<a href="https://arxiv.org/abs/2001.08116" target="_blank">Van de Wiele et al. 2020</a>].');
+  }
+  
+  // Table 12
+  // It seems that the column "Method properties" can be ignored because the only policy-based method in the table uses MC, and it is rejected due to being policy-based anyway in cases where MC should be rejected; although I haven't checked whether the arguments for rejecting or disfavoring MC are valid for policy-based methods.
+  if (document.getElementById("pastObservationsNotImportant").checked && document.getElementById("durationShort").checked) {
+    rejectOrDisfavor("MC", "disfavored", "Eligibility traces and <i>n</i>-step methods (i.e. methods other than MC and TD) are preferred because they can be tuned to an optimal trade-off between MC and TD methods.");
+    rejectOrDisfavor("TD", "disfavored", "Eligibility traces and <i>n</i>-step methods (i.e. methods other than MC and TD) are preferred because they can be tuned to an optimal trade-off between MC and TD methods.");
+  }
+  if (document.getElementById("durationLong").checked) {
+    rejectOrDisfavor("MC", "rejected", "Updating parameters only after completed episodes is often inefficient if episodes are long.");
+  }
+  if (document.getElementById("pastObservationsNotImportant").checked && document.getElementById("rewardsGood").checked && document.getElementById("durationLong").checked) {
+    eligibilityTracesNStep.forEach((methodProperty) => {
+      rejectOrDisfavor(methodProperty, "disfavored", "Such methods are usually more difficult to implement and debug than TD.");
+    });
+  }
+  if (document.getElementById("pastObservationsImportant").checked) {
+    rejectOrDisfavor("TD", "rejected", "When past observations are important, TD learning does not work well as parameter updates are only based on information about single environment steps.");
+    // alternative formulation: "TD methods are less robust in this situation where important information may become unobservable. This is because their parameter updates are only based on information about single environment steps."
+  }
+  if (document.getElementById("rewardsBadOrUnclear").checked && document.getElementById("durationLong").checked) {
+    rejectOrDisfavor("TD", "rejected", "In TD learning, updates are only based on information about single environment steps, and most individual steps are uninformative in an environment where rewards are obtained in only a few states and episodes are long.");
+  }
+  
+  // Table 13 apparently requires asking whether a stochastic or deterministic target policy will be chosen. Before we implement the logic of Table 13, this new question (about a method property, unlike the other questions, which are about environment properties) requires also some logic unrelated to Table 13 to be implemented:
+  // Certain environment properties forbid selecting a deterministic target policy in the first place.
+  radioButtonTargetPolicyDeterministic = document.getElementById("targetPolicyDeterministic");
+  if (document.getElementById("rewardsBadOrUnclear").checked || document.getElementById("optimalPolicyProbablyStochastic").checked) {
+    radioButtonTargetPolicyDeterministic.disabled = true;
+    document.getElementById("targetPolicyDeterministicRejected").style.display = 'inline';
+    if (radioButtonTargetPolicyDeterministic.checked) {
+      radioButtonTargetPolicyDeterministic.checked = false;
+      alert('This choice fordbids the use of a deterministic target policy. The radio button below for a deterministic target policy has been unchecked.');
+    }
+  }
+  else {
+    radioButtonTargetPolicyDeterministic.disabled = false;
+    document.getElementById("targetPolicyDeterministicRejected").style.display = 'none';
+  }
+  // If a deterministic target policy will be chosen, on-policy methods need to be rejected. Previously, this was described at all times (with class="rejected-legend") in the tooltip of on-policy methods, but now that there's a question about the target policy, we can reject on-policy methods in the usual way. TODO hide the former description when the latter one is visible (which is due to "targetPolicyDeterministic" being selected); otherwise unhide it.
+  if (document.getElementById("targetPolicyDeterministic").checked) {
+    rejectOrDisfavor("On-policy", "rejected", "You selected a deterministic target policy. On-policy methods shouldn’t be used with a deterministic target policy because that impedes exploration at training time, which is usually undesirable. Feel free to choose a stochastic target policy in the questionnaire instead.");
+  }
+  
+  // Table 13
+  // Add CSS class "combination-a" (where "a" is a serial letter as in A, B, C, ... for distinguishing different combinations) to table cells containing method properties that are part of a combination of several method properties that causes disfavoring the method.
+  combinationAExplanation = "Then the method is value-based with a learned search procedure or policy-based with a stochastic target policy or actor-critic with a stochastic target policy, entropy regularization might help. For details, please select whether rewards are non-deceptive and quite dense.";
+  if (document.getElementById("rewardsGood").checked) {
+    combinationAExplanation = "With this combination of environment properties and method properties (rewards are non-deceptive and quite dense, and the method is value-based with a learned search procedure or policy-based with a stochastic target policy or actor-critic with a stochastic target policy), entropy regularization is preferred because it might prevent a stochastic policy from premature convergence. Specifically, soft Q-learning seems to be the most popular and it is powerful as it considers the entropy of the distribution over entire trajectories (not only locally at individual states as in per-state entropy regularization, for instance). Hence, options other than soft Q-learning are less preferred when <i>combined</i> (hence the stripes in several table cells that only combined yield a solid yellow color) with those method properties.";
+    // The number of points deducted for this combination of method properties is tiny (see "Low priority (in the sense of “the decision has lower priority than other decisions”)" and "(consider first)" in the paper), so we represent the number of points as something like "minus0dot1", meaning -0.1.
+    rejectOrDisfavor("Kullback–Leibler divergence regularization", "combination-a-minus0dot1", combinationAExplanation);
+    rejectOrDisfavor("Per-state entropy regularization", "combination-a-minus0dot1", combinationAExplanation);
+    rejectOrDisfavor("Per-state entropy and Kullback–Leibler divergence regularization", "combination-a-minus0dot1", combinationAExplanation);
+    rejectOrDisfavor("Mutual-information regularization", "combination-a-minus0dot1", combinationAExplanation);
+    // -0.2 points for "No entropy regularization"
+    rejectOrDisfavor("No entropy regularization", "combination-a-minus0dot2", combinationAExplanation);
+  }
+  if (document.getElementById("rewardsBadOrUnclear").checked) {
+    combinationAExplanation = 'With this combination of environment properties and method properties (rewards are possibly sparse or deceptive, and the method is value-based with a learned search procedure or policy-based with a stochastic target policy or actor-critic with a stochastic target policy), enhanced entropy ensures good exploration [<a href="https://arxiv.org/abs/1801.01290" target="_blank">Haarnoja et al. 2018</a>], which helps in sparse- and/or deceptive-reward settings. Specifically, soft Q-learning seems to be the most popular and it is powerful as it considers the entropy of the distribution over entire trajectories (not only locally at individual states as in per-state entropy regularization, for instance). Hence, options other than soft Q-learning are less preferred when <i>combined</i> (hence the stripes in several table cells that only combined yield a solid yellow color) with those method properties. If computing the entropy is impossible, e.g. due to a non-invertible stochastic process, regularization can potentially be based on a mutual information objective. To examine whether this is possible, <a href="https://arxiv.org/abs/1704.03012" target="_blank">Florensa et al. [2017]</a> might be an initial reference.';
+    // TODO Deduct more points because unlike the previous row of Table 13, this row doesn't say "Low priority"
+    rejectOrDisfavor("Kullback–Leibler divergence regularization", "combination-a-minus0dot1", combinationAExplanation);
+    // Don't forget about "Per-state entropy and Kullback–Leibler divergence regularization" - a mix (of two regularization methods) that Table 13 doesn't explicitly address
+    rejectOrDisfavor("Per-state entropy and Kullback–Leibler divergence regularization", "combination-a-minus0dot1", combinationAExplanation);
+    rejectOrDisfavor("Per-state entropy regularization", "combination-a-minus0dot2", combinationAExplanation);
+    // TODO Deduct more points for "Mutual-information regularization" than "Per-state entropy regularization"
+    rejectOrDisfavor("Mutual-information regularization", "combination-a-minus0dot2", combinationAExplanation);
+  }
+  rejectOrDisfavor("Non-tabular value-based with approximate maximization and learned search procedure", "combination-a", combinationAExplanation);
+  if (document.getElementById("targetPolicyStochastic").checked) {
+    rejectOrDisfavor("Policy-based", "combination-a", combinationAExplanation);
+    rejectOrDisfavor("Actor-critic", "combination-a", combinationAExplanation);
+  }
+  
+  
+  // A deterministic target policy is always disfavored (sometimes even rejected) anyway, and the number of points deducted in Table 13 seems smaller than for a deterministic target policy (TODO these different numbers of points might have to be implemented though), so maybe the target policy can be assumed to be stochastic here? In other words, if value-based with learned search procedure or policy-based or actor-critic, disfavor No entropy regularization because either policy stochastic and thus Table 13 forbids No entropy regularization or target policy is deterministic and thus should be disfavored and thus algorithms that are only appropriate for deterministic should be disfavored.
+  // In the list, value-based methods without a learned search procedure don't have entropy regularization. Should they be disfavored for not having entropy regularization? -> see email.
+  
+  // TODO initialize an empty set of strings (e.g. hash table) and fill it with entries such as "jointlyDisfavorOffpolicyAndDeterministic", then use that in `if`-statements to implement things such as Tables 9&10.
+  
+  // ("Off-policy", "Deterministic", "disfavored", "Off-policy and Deterministic are not necessarily problematic in separation, but methods that combine them are less preferred because TODO");
+
+  // always prefer distributional algorithms
+  rejectOrDisfavor("Not distributional", "disfavored", 'Distributional approaches are preferred instead because they may improve exploration generalization, training stability, and overall performance at the cost of training an additional density estimator [<a href="https://arxiv.org/abs/1712.02037" target="_blank">Henderson et al. 2017</a>, <a href="https://arxiv.org/abs/1602.04621" target="_blank">Osband et al. 2016</a>].');
+  
+  // TODO replace all occurrences of "disfavored" and similar things above by the number of points deducted for those method properties
+  
+  // hide rejected table rows if the according checkbox is checked
+  // TODO what speaks against doing this in CSS instead?
+  if (document.getElementById("hide").checked) {
+    Array.from(document.getElementsByClassName("rejected")).forEach(element => element.parentElement.classList.add("hiddenMethod"));
+  }
+}
+
+function rejectOrDisfavor(methodProperty, status, reason) {
+  // `status` can be "rejected" or "disfavored"
+  methodPropertyClassName = toClassName(methodProperty);
+  var tds = document.getElementsByClassName(methodPropertyClassName);
+  // TODO add <div> with a warning to webpage if no such method property was found
+  for (var i = 0; i < tds.length; i++) {
+    var td = tds[i];
+    td.classList.add(status)
+    var div = document.createElement('div');
+    div.className = status;
+    div.innerHTML = reason;
+    td.getElementsByClassName("tooltip")[0].appendChild(div);
+  }
+}
+
+function jointlyRejectOrDisfavor(methodProperty1, methodProperty2, status, reason) {
+  // TODO when calling this function, `reason` should be something like "Off-policy and Deterministic are not necessarily problematic in separation, but methods that combine them are less preferred because ..."
+  methodProperty1ClassName = toClassName(methodProperty1);
+  methodProperty2ClassName = toClassName(methodProperty2);
+  // TODO maybe instead of method-property-specific class names like `status+'-if-'+methodProperty2ClassName`, the class name can be generic like .jointly-disvavored, and it should be added in JS only to rows with both method properties, rather than CSS-selectored for formatting based on method properties
+  rejectOrDisfavor(methodProperty1, status+'-if-'+methodProperty2ClassName, reason);
+  rejectOrDisfavor(methodProperty2, status+'-if-'+methodProperty1ClassName, reason);
+}
+</script>
+
+  <!----------------------
+    4. LIST OF ALGORITHMS
+    ---------------------->
+
+  <div style="flex: 3;"> <!-- "overflow-y: scroll" affects the width -->
+
+<table>
+<!-- Text in each <td> is wrapped in a <div> so that it can have a different background color than the <td> during :hover -->
+
+<tr>
+<td><div><a href="https://link.springer.com/article/10.1007/BF00992698" target="_blank">Q-learning [Watkins &amp; Dayan 1992]</a> with TD</div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Tabular value-based with exact maximization</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://link.springer.com/article/10.1007/BF00992698" target="_blank">Q-learning [Watkins &amp; Dayan 1992]</a> with Q(&lambda;)</div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Tabular value-based with exact maximization</div></td>
+<td><div>Q(&lambda;)</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="" target="_blank">SARSA<br />[Rummery et al. 1994]</a><br />with TD</div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Tabular value-based with exact maximization</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="" target="_blank">SARSA<br />[Rummery et al. 1994]</a><br />with SARSA(&lambda;)</div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Tabular value-based with exact maximization</div></td>
+<td><div>SARSA(&lambda;)</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://www.nature.com/articles/nature14236" target="_blank">DQN<br />[Mnih et al. 2015]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1509.06461" target="_blank">Double DQN (DDQN)<br />[van Hasselt et al. 2016]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1511.06581" target="_blank">Dueling DQN<br />[Wang et al. 2016]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1507.06527" target="_blank">DRQN<br />[Hausknecht &amp; Stone 2015]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1511.05952" target="_blank">Prioritized DQN<br />[Schaul et al. 2016]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1704.03732" target="_blank">DQfD<br />[Hester et al. 2018]</a><br />with TD</div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1704.03732" target="_blank">DQfD<br />[Hester et al. 2018]</a><br />with TD(n)</div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD(n)</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1604.06057" target="_blank">h-DQN<br />[Kulkarni et al. 2016]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1707.06887" target="_blank">Distributional DQN (also called c51)<br />[Bellemare et al. 2017]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1710.10044" target="_blank">QR-DQN<br />[Dabney et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1710.02298" target="_blank">Rainbow<br />[Hessel et al. 2017]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD(n)</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1705.05035" target="_blank">Sequential DQN<br />[Metz et al. 2017]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with approximate maximization and fixed search procedure</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/2001.08116" target="_blank">AQL<br />[Van de Wiele et al. 2020]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with approximate maximization and learned search procedure</div></td>
+<td><div>Q(&lambda;)</div></td>
+<td><div>Per-state entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1805.04874" target="_blank">GAN Q-learning<br />[Doan et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1602.04621" target="_blank">Bootstrapped DQN<br />[Osband et al. 2016]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1806.10293" target="_blank">QT-Opt<br />[Kalashnikov et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with approximate maximization and fixed search procedure</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://openreview.net/pdf?id=r1lyTjAqYX" target="_blank">R2D2<br />[Kapturowski et al. 2019]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD(n)</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/2003.13350" target="_blank">Agent57<br />[Badia et al. 2020]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>Retrace(&lambda;)</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1803.00933" target="_blank">Ape-X DQN<br />[Horgan et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Non-tabular value-based with exact maximization</div></td>
+<td><div>TD(n)</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://link.springer.com/article/10.1007/BF00992696" target="_blank">REINFORCE<br />[Williams 1992]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Policy-based</div></td>
+<td><div>MC</div></td>
+<td><div>Per-state entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1702.08892" target="_blank">PCL<br />[Nachum et al. 2017]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD(n)</div></td>
+<td><div>Soft Q-learning</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1205.4839" target="_blank">Off-PAC<br />[Degris et al. 2012]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>GTD(&lambda;)</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1704.04651" target="_blank">Reactor<br />[Gruslys et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>Retrace(&lambda;)</div></td>
+<td><div>Per-state entropy regularization</div></td>
+<td><div>Distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1704.02399" target="_blank">A2C-SVPG<br />[Liu et al. 2017]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>GAE(&lambda;)</div></td>
+<td><div>Soft Q-learning</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1806.06920" target="_blank">MPO<br />[Abdolmaleki et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>Retrace(&lambda;)</div></td>
+<td><div>Kullback&ndash;Leibler divergence regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1909.03198" target="_blank">DSPG<br />[Shi et al. 2019]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD</div></td>
+<td><div>Soft Q-learning</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1806.06798" target="_blank">NFP/NBP<br />[Tang &amp; Agrawal 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD</div></td>
+<td><div>Per-state entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1910.00177" target="_blank">AWR<br />[Peng et al. 2019]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD(&lambda;)</div></td>
+<td><div>Kullback&ndash;Leibler divergence regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://proceedings.mlr.press/v32/silver14.pdf" target="_blank">DPG<br />[Silver et al. 2014]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1509.02971" target="_blank">DDPG<br />[Lillicrap et al. 2016]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1804.08617" target="_blank">D3PG<br />[Barth-Maron et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD(n)</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1804.08617" target="_blank">D4PG<br />[Barth-Maron et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD(n)</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1502.05477" target="_blank">TRPO<br />[Schulman et al. 2015a]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD(n)</div></td>
+<td><div>Kullback&ndash;Leibler divergence regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1707.06347" target="_blank">PPO<br />[Schulman et al. 2017]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>GAE(&lambda;)</div></td>
+<td><div>Per-state entropy and Kullback&ndash;Leibler divergence regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1906.05862" target="_blank">HiPPO<br />[Li et al. 2020]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>GAE(&lambda;)</div></td>
+<td><div>Kullback&ndash;Leibler divergence regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1805.08296" target="_blank">HiRO<br />[Nachum et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1704.03012" target="_blank">SNN4HRL<br />[Florensa et al. 2017]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD(n)</div></td>
+<td><div>Mutual-information regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1602.01783" target="_blank">A2C/A3C<br />[Mnih et al. 2016]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD(n)</div></td>
+<td><div>Per-state entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1611.01224" target="_blank">ACER<br />[Wang et al. 2017]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>Retrace(&lambda;)</div></td>
+<td><div>Per-state entropy and Kullback&ndash;Leibler divergence regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://link.springer.com/chapter/10.1007/11564096_29" target="_blank">NAC<br />[Peters et al. 2005]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>LSTD-Q(&lambda;)</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1708.05144" target="_blank">ACKTR<br />[Wu et al. 2017]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD(n)</div></td>
+<td><div>Per-state entropy and Kullback&ndash;Leibler divergence regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1802.09477" target="_blank">TD3<br />[Fujimoto et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1801.01290" target="_blank">SAC<br />[Haarnoja et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD</div></td>
+<td><div>Soft Q-learning</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1802.05313" target="_blank">Normalized actor-critic (sometimes also abbreviated as NAC)<br />[Gao et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD</div></td>
+<td><div>Soft Q-learning</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1912.11077" target="_blank">Hybrid SAC<br />[Delalleau et al. 2019]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD</div></td>
+<td><div>Soft Q-learning</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/2001.02811" target="_blank">Distributional SAC<br />[Duan et al. 2021]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD</div></td>
+<td><div>Soft Q-learning</div></td>
+<td><div>Distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1506.02438" target="_blank">GAE-TRPO<br />[Schulman et al. 2015b]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>GAE(&lambda;)</div></td>
+<td><div>Kullback&ndash;Leibler divergence regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1802.01561" target="_blank">IMPALA<br />[Espeholt et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>V-trace(n)</div></td>
+<td><div>Per-state entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1910.06591" target="_blank">SEED<br />[Espeholt et al. 2020]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>V-trace(n)</div></td>
+<td><div>Per-state entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1803.00933" target="_blank">Ape-X DPG<br />[Horgan et al. 2018]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD(n)</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1611.02247" target="_blank">Q-Prop<br />[Gu et al. 2017]</a></div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>GAE(&lambda;)</div></td>
+<td><div>Kullback&ndash;Leibler divergence regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1711.00123" target="_blank">(RE)LAX<br />[Grathwohl et al. 2018]</a><br />with MC</div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>MC</div></td>
+<td><div>Per-state entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+<!-- <td><div>Added here by [TODO example GitHub user]</div></td> -->
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/1711.00123" target="_blank">(RE)LAX<br />[Grathwohl et al. 2018]</a><br />with TD</div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD</div></td>
+<td><div>Per-state entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+<!-- <td><div>Added here by [TODO example GitHub user]</div></td> -->
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/2101.05982" target="_blank">REDQ<br />[Chen et al. 2021]</a><br />with MC</div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>MC</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/2101.05982" target="_blank">REDQ<br />[Chen et al. 2021]</a><br />with TD</div></td>
+<td><div>Model-free</div></td>
+<td><div>Off-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div><a href="https://arxiv.org/abs/2203.04955" target="_blank">TD-MPC<br />[Hansen et al. 2022]</a><br /></div></td>
+<td><div>Model-free</div></td>
+<td><div>On-policy</div></td>
+<td><div>Actor-critic</div></td>
+<td><div>TD</div></td>
+<td><div>No entropy regularization</div></td>
+<td><div>Not distributional</div></td>
+<td><div>Not distributed</div></td>
+<td><div>Not hierarchical</div></td>
+<td><div>Not imitation learning</div></td>
+</tr>
+
+<tr>
+<td><div>For model-based algorithms, see e.g. the survey papers<br />
+  <a href="https://arxiv.org/abs/2006.16712" target="_blank">Moerland et al. (2020b)</a>,<br />
+  <a href="https://arxiv.org/abs/2006.15009" target="_blank">Moerland et al. (2020a)</a>,<br />
+  <a href="https://arxiv.org/abs/1907.02057" target="_blank">Wang et al. (2019)</a>,<br />
+  <a href="https://arxiv.org/abs/2011.04021" target="_blank">Hamrick et al. (2020)</a>,<br />
+  <a href="https://arxiv.org/abs/2008.05598" target="_blank">Plaat et al. (2020)</a>.
+</div></td>
+<td><div>Model-based</div></td>
+<td colspan="8"></td>
+</tr>
+
+
+</table>
+  </div>
+</div>
+
+<br />
+
+<div style="position: fixed; width: 100%; bottom: 0; left: 0; background-color: #ff5577; padding: 5px 5px 4px 5px;">If you find this overview helpful, please cite the detailed version as <a href="https://arxiv.org/search/?searchtype=author&query=Bongratz%2C+F" target="_blank">Bongratz et al., 2024</a></div>
+
+<!----------------------
+  5. EXPLANATIONS OF ALGORITHM PROPERTIES
+  ---------------------->
+
+<script>
+function toClassName(text) {
+  return "m-" + text.replace(/\u03bb/g, "&lambda;").toLowerCase().replace(/[^a-zA-Z0-9]/g, '-');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Add classes to <td> elements based on their text contents.
+  var elements = document.getElementsByTagName("td");
+  for (var i = 0; i < elements.length; i++) {
+    var element = elements[i];
+    var text = element.textContent.trim();
+    element.classList.add(toClassName(text));
+  }
+  // All algorithms listed so far are model-free. Store this info in the first <td> of each <tr>.
+  /* Not needed because I'm adding an explicit column that says "model-free".
+  var elements = document.getElementsByTagName("tr");
+  for (var i = 0; i < elements.length; i++) {
+    var element = elements[i];
+    element.children[0].classList.add(toClassName("Model-free"));
+  }
+  */
+    
+  // Changes of radio buttons should trigger `update()`.
+  Array.from(document.getElementsByTagName("input")).forEach(element => element.addEventListener("change", update));
+  
+  const snippets = {
+    'value-based':
+    '<b>Value-based</b> algorithms infer the policy directly from a learned action-value function <span class="equation-display"><i>Q</i>(<i>s</i>,<i>a</i>) = &Eopf;(&Sigma;<span style="display: inline-flex; flex-direction: column-reverse; justify-content: space-between; vertical-align: middle; font-size: 80%;"><span>τ=<i>t</i></span><span><i>t</i><sub>max</sub></span></span> <i>r</i><sub>τ+1</sub> | <i>s<sub>t</sub> = s, a<sub>t</sub> = a</i>)</span> that assigns an expected value of subsequent cumulative rewards to every possible state-action pair (a more accurate name would be “state-action-value function” but “actionvalue function” is widely established). See the next column for methods to learn such an action-value function. In value-based algorithms, the agent selects an action <span class="equation-display"><i>a<sub>t</sub></i> = argmax<sub><i>a</i></sub>&nbsp;<i>Q</i>(<i>s<sub>t</sub> , a</i>)</span> at each time step <i>t</i>. Due to the deterministic computation of the argmax, this leads to a primarily deterministic policy (if multiple actions maximize <i>Q</i> at a certain state, one of them may be selected randomly). However, there exist ways to make the actions stochastic (cf. Section 3.1 of our paper), leading to policies that deviate from the argmax but are still built upon this definition and therefore considered value-based.',
+    
+    'non-tabular':
+    '<b>Non-tabular</b> value-based methods approximate the action-value function with a non-tabular function <i>Q<sub>ϕ</sub></i>(<i>s,a</i>), where <i>ϕ</i> are trainable parameters. In most cases, <i>Q<sub>ϕ</sub></i> is represented by a deep neural network and an action at time <i>t</i> is given by <span class="equation-display"><i>a<sub>t</sub></i> = argmax<sub><i>a</i></sub>&nbsp;<i>Q<sub>ϕ</sub></i>(<i>s<sub>t</sub> , a</i>).</span>',
+    
+    'n-step etc':
+    'Eligibility traces, <i>n</i>-step methods, and related algorithms usually provide a trade-off between one-step bootstrapping and MC learning in the sense that they consider the reward of multiple steps together with a bootstrapped value as the learning objective. For instance, replacing the objective <span class="equation-inline"><i>r</i><sub><i>t</i>+1</sub> + <i>γV<sub>ϕ</sub></i>(<i>s</i><sub><i>t</i>+1</sub>)</span> by <span class="equation-inline"><i>r</i><sub><i>t</i>+1</sub> + <i>γr</i><sub><i>t</i>+2</sub> + <i>γV<sub>ϕ</sub></i>(<i>s</i><sub><i>t</i>+2</sub>)</span> in TD methods would make it a 2-step method. In general, MC and TD methods are special cases of eligibility traces and <i>n</i>-step methods. That is, MC and TD methods can usually be recovered for certain values of an additional hyperparameter (e.g., <span class="equation-inline"><i>n</i> = ∞</span> for MC and <span class="equation-inline"><i>n</i> = 1</span> for TD in <i>n</i>-step methods) [<a href="http://incompleteideas.net/book/the-book-2nd.html" target="_blank">Sutton & Barto 2018</a>: Section 12], [<a href="https://arxiv.org/abs/1606.02647" target="_blank">Munos et al. 2016</a>], [<a href="https://arxiv.org/abs/2007.01839" target="_blank">van Hasselt et al. 2020</a>]. That way, the benefits of one-step bootstrapping and MC methods can often be combined in one algorithm. Examples of such methods are: '+eligibilityTracesNStep.join(', ')+'.',
+    
+    'per-state':
+    'A per-state entropy regularization term in the objective function of the policy can be used [<a href="https://www.tandfonline.com/doi/abs/10.1080/09540099108946587" target="_blank">Williams & Peng 1991</a>, <a href="https://arxiv.org/abs/1602.01783" target="_blank">Mnih et al. 2016</a>]. More precisely, a term of the form <span class="equation-inline">&Eta;(<i>π<sub>θ</sub></i>( · | <i>s<sub>t</sub></i>))</span> can be added to the reward in order to enhance the information entropy &Eta; of the policy in the current state <i>s<sub>t</sub></i>.',
+    
+    'KL':
+    'A Kullback–Leibler divergence regularization term in the objective that is minimized with respect to policy parameters, i.e. a term <span class="equation-inline"><i>D</i><sub>KL</sub>(<i>π<sub>θ</sub></i>( · | <i>s<sub>t</sub></i>) ∥ <i>q</i>( · ))</span>, where <span class="equation-inline"><i>q</i>( · )</span> can be any probability distribution and <i>D</i><sub>KL</sub> denotes the Kullback–Leibler divergence between two probability distributions. In practice, <span class="equation-inline"><i>q</i>( · )</span> can be chosen to be the old action distribution [<a href="https://arxiv.org/abs/1707.06347" target="_blank">Schulman et al. 2017</a>], i.e. the policy before updating the parameters according to the objective. This can be interpreted as a relative entropy constraint on the parameter update because strong changes in the entropy of the stochastic policy are penalized and policies are usually initialized to have high entropy at the beginning of training (potentially drifting towards low entropy after some iterations).',
+    
+    '': '' // no trailing comma in order to not confuse older browsers
+  }
+  
+  const methodPropertyExplanations = {
+    'Model-free':
+    'Model-free RL algorithms aim to learn a policy and/or a value function directly from interacting with the environment without being aware of the underlying environment dynamics. That is, a model of the environment dynamics is not involved at any point in the algorithmic procedure.',
+    
+    'Model-based':
+    'Model-based RL algorithms model the environment dynamics explicitly, i.e. they include an environment model somehow in the algorithmic procedure. This model can either be given in advance, or it can be learned simultaneously with the policy. The variety of model-based approaches ranges from methods that slightly augment an otherwise model-free RL approach with an environment model (e.g. simulating environmental transitions from the environment model in addition to real-world experience) to methods that infer an entire policy from planning based on the environment model.',
+    
+    'Hierarchical':
+    'In hierarchical RL, the agent performs a coarse-to-fine cascade of several consequent decisions about the next action. The hierarchy of these decisions is often based on temporal and/or spatial abstractions that are hardwired by the programmer or learned by the agent. It is probably most convenient to consider a concrete example: Assume we have a robot that can move around with multiple wheels. Then, a high-level action (sometimes also called skill in this context) could be “driving an S-curve” while a lower-level action describes how exactly to do that, i.e. how to turn which wheel. Consequently, multiple different policies with different levels of abstraction can be trained. In some cases, it is even possible to transfer skills from one task to another while training other skills from scratch or to finetune them. In the above example, a hierarchical RL approach would allow to first train the skill “driving an S-curve” independently of other skills and then, potentially in a new environment, train a higher-level policy that chooses among multiple skills, e.g. “driving an S-curve” and “driving straight ahead”.',
+    
+    'Not hierarchical':
+    'Non-hierarchical algorithms do not contain an explicit coarse-to-fine cascade of several consequent decisions about the next action (although parts of the neural network might learn to approximately perform a hierarchy of decisions). In the literature about hierarchical RL, non-hierarchical RL algorithms are sometimes called <i>algorithms with flat policy</i>.',
+    
+    'Imitation learning':
+    'A field closely related to reinforcement learning is imitation learning. While RL algorithms aim to solve a decision-making problem based on some environmental feedback (the rewards <i>r</i>), imitation-learning algorithms learn a policy based on observing the behavior of an expert. While a detailed overview of imitation-learning algorithms is beyond the scope of this work (see related literature about imitation learning, e.g. <a href="https://scholar.google.de/scholar?cluster=14158599110496687691" target="_blank">Argall et al. [2009]</a>, <a href="https://arxiv.org/abs/1905.13566" target="_blank">Torabi et al. [2019]</a>, <a href="https://arxiv.org/abs/2102.13185" target="_blank">Zhu et al. [2021]</a>, <a href="https://arxiv.org/abs/1606.03476" target="_blank">Ho &amp; Ermon [2016]</a>, <a href="https://arxiv.org/abs/1912.05032" target="_blank">Kostrikov et al. [2019]</a>, <a href="https://arxiv.org/abs/1011.0686" target="_blank">Ross et al. [2010]</a>), our table solely lists methods that combine imitation learning with RL, as well as RL methods that do not perform imitation learning at all, but our table does not list methods that perform imitation learning without RL. Notably, the performance of an agent trained with pure imitation learning is quite bounded by the performance of the expert. In contrast, an algorithm that uses both concepts (RL and imitation learning) jointly might have better chances of outperforming the expert at the end of the training phase [<a href="https://arxiv.org/abs/1704.03732" target="_blank">Hester et al. 2017</a>].',
+    
+    'Not imitation learning':
+    'Algorithms without imitation learning listed here usually do not use expert trajectories in the learning process of the agent.',
+    
+    'Distributed':
+    'In distributed algorithms, there exist two or more actors, i.e. parallel sub-processes of which each acts in a separate instance of the environment and creates training data, and one or more learners, i.e. parallel sub-processes that are responsible for updating parameters, at training time. The number of learners can be smaller, equal, or larger than the number of actors. Especially if the acquisition of experience is slow, the parallel execution of actor processes can significantly reduce training time since more experience is acquired in less time. Multiple learners allow, for example, for an asynchronous and parallel computation of gradients [<a href="https://arxiv.org/abs/1602.01783" target="_blank">Mnih et al. 2016</a>], thus also speeding up training.',
+    
+    'Not distributed':
+    'Non-distributed algorithms only employ one actor and one learner.',
+    
+    'Distributional':
+    'Distributional approaches estimate the probability distribution of the cumulative reward &Sigma;<i><sub>t</sub>&nbsp;r<sub>t</sub></i> (where <i>r<sub>t</sub></i> is the reward at time <i>t</i>) instead of merely estimating its expected value &Eopf;[&Sigma;<i><sub>t</sub>&nbsp;r<sub>t</sub></i>].',
+    
+    'Not distributional':
+    'Non-distributional approaches merely estimate the expected value &Eopf;[&Sigma;<i><sub>t</sub>&nbsp;r<sub>t</sub></i>] of the cumulative reward &Sigma;<i><sub>t</sub>&nbsp;r<sub>t</sub></i> (where <i>r<sub>t</sub></i> is the reward at time&nbsp;<i>t</i>) instead of estimating the entire probability distribution of the cumulative reward.',
+    
+    'On-policy':
+    'In on-policy algorithms, the behavior policy (the policy used to perform actions during training) and the target policy (the policy being trained) are always equal. Only experience collected with the target/behavior policy in its current state (right before the parameter update) is used to update the target policy. After the parameter update, the previously collected experience becomes worthless for the on-policy algorithm since the policy under which the experience has been acquired is then different from the current target policy, and new experience with the updated target policy needs to be collected.<br /><br />On-policy methods shouldn’t be used with a <span class="rejected-legend">deterministic target policy</span> because that impedes exploration at training time, which is usually undesirable.',
+    
+    'Off-policy':
+    'Off-policy algorithms allow the behavior policy (the policy used to perform actions during training) to differ from the target policy (the policy being trained). In contrast to on-policy methods, experience collected under a behavior policy that was different than the current target policy can be used for updating the parameters of the target policy. A typical example is to increase the amount of exploration by using a behavior policy that has more randomness than the current target policy. Also, the allowed discrepancy between the two policies is often exploited by using a <i>replay buffer</i>, in which experience acquired under the behavior of multiple older versions of the behavior policy is stored. It is also possible to integrate some expert trajectories into the replay buffer, leading to a form of imitation learning. Finally, the experience in a replay buffer can be <i>prioritized</i> such that training samples that seem to be promising for the training process are replayed more frequently than potentially less important ones [<a href="https://arxiv.org/abs/1511.05952" target="_blank">Schaul et al. 2015</a>].',
+    
+    'Tabular value-based with exact maximization':
+    snippets['value-based']+'<br /><br /><b>Tabular</b> value-based methods define an action value for each possible state-action pair (<i>s,a</i>) in a tabular way, i.e. a table that represents the action-value function <i>Q</i>(<i>s,a</i>). For tabular action-value-based methods (in contrast to non-tabular methods, see below), very good convergence guarantees exist and exact maximization is usually possible [<a href="https://www.cs.rhul.ac.uk/~chrisw/new_thesis.pdf" target="_blank">Watkins 1989</a>], [<a href="http://incompleteideas.net/book/the-book-2nd.html" target="_blank">Sutton & Barto 2018</a>: Sections 5, 6]. Tabular methods are not related to deep learning and we list only a few examples; a detailed description can be found in [<a href="http://incompleteideas.net/book/the-book-2nd.html" target="_blank">Sutton & Barto 2018</a>: Chapter I]. For the sake of completeness, we indicate in which situation a tabular value-based approach might be most appropriate.',
+    
+    'Non-tabular value-based with exact maximization':
+    snippets['value-based']+'<br /><br />'+snippets['non-tabular']+'<br />In value-based methods with <b>exact maximization</b> over actions, the action <i>a</i> is given by the one that exactly maximizes <i>Q<sub>ϕ</sub></i>(<i>s,a</i>) at the current state <i>s</i>.',
+    
+    'Non-tabular value-based with approximate maximization and fixed search procedure':
+    snippets['value-based']+'<br /><br />'+snippets['non-tabular']+'<br />Value-based methods with <b>approximate maximization and fixed search procedure</b> compute an action that might not maximize the action-value function exactly, using a fixed procedure such as the cross-entropy method [<a href="https://link.springer.com/book/10.1007/978-1-4757-4321-0" target="_blank">Rubinstein & Kroese 2004</a>].',
+    
+    'Non-tabular value-based with approximate maximization and learned search procedure':
+    snippets['value-based']+'<br /><br />'+snippets['non-tabular']+'<br />Value-based methods with <b>approximate maximization and learned search procedure</b> compute an action (that might not maximize the action-value function exactly) using another learned function that proposes a set of promising actions [<a href="https://arxiv.org/abs/2001.08116" target="_blank">Van de Wiele et al. 2020</a>]. The idea is to reduce the potentially large set of possible actions to a smaller set of which the best action can be easily determined. Such methods are conceptually similar to actor-critic methods. The difference is that the executed action is here determined by the action-value function from the set of proposals. In contrast, in actor-critic methods, an action proposed by the actor is directly executed without having its action value assessed before.',
+    
+    'Policy-based':
+    'Policy-based algorithms parameterize the policy explicitly. That is, they have a set of learnable parameters <i>θ</i> defining the policy <span class="equation-inline"><i>π<sub>θ</sub></i>(<i>a</i>|<i>s</i>)</span>. At each time step <i>t</i>, the agent selects an action <span class="equation-inline"><i>a<sub>t</sub></i> ~ <i>π<sub>θ</sub></i>(<i>a</i>|<i>s<sub>t</sub></i>)</span>. Note that the policy does not necessarily need to be stochastic — it can also be a deterministic function <span class="equation-inline"><i>a</i> = <i>μ<sub>θ</sub></i>(<i>s</i>)</span>, i.e. <span class="equation-inline"><i>π</i>(<i>a</i>|<i>s</i>) = 1</span> iff <span class="equation-inline"><i>a</i> = <i>μ<sub>θ</sub></i>(<i>s</i>)</span>. We ignore this detail for the sake of simplicity unless stated otherwise. Purely policy-based methods (in contrast to actor-critic methods, see next bullet point), also called REINFORCE algorithms due to <a href="https://link.springer.com/article/10.1007/BF00992696" target="_blank">Williams [1992]</a>, assess the quality of the current policy based on cumulative rewards <span class="equation-inline">&Sigma;<i><sub>t</sub> r<sub>t</sub></i></span> obtained from episodes that have been completed with this policy. Similarly to Monte Carlo value-function learning (see Section 2.8), this implies that parameters can only be updated at the end of completed episodes. In order to increase training stability, a learned baseline, often a state-value function <i>V</i>(<i>s</i>) trained with one of the algorithms of Section 2.8, is commonly subtracted from the observed cumulative reward in such methods [<a href="https://link.springer.com/article/10.1007/BF00992696" target="_blank">Williams 1992</a>, <a href="https://arxiv.org/abs/1602.01783" target="_blank">Mnih et al. 2016</a>], see Section 6.1. Policy-based methods (without a learned critic) allow for unbiased estimates of the policy gradients, in contrast to actor-critic methods [<a href="https://link.springer.com/article/10.1007/BF00992696" target="_blank">Williams 1992</a>]. Note that we ignore estimates of higher-order derivatives like the Hessian and only consider policy gradients for simplicity.',
+    
+    'Actor-critic':
+    'Actor-critic methods can be considered to be both policy-based and value-based. These algorithms update the policy parameters based on an additional learned value function that is used in place of actually observed cumulative rewards in policy-based methods. This function is commonly called the <i>critic</i> and the policy function is commonly called an <i>actor</i> in the context of actor-critic methods. The critic approximates the state-value function <i>V</i>(<i>s</i>) (future cumulative reward as an expectation over all actions in state <i>s</i>), the action-value function <i>Q</i>(<i>s</i>,<i>a</i>) (future cumulative reward given a particular action <i>a</i> in state <i>s</i>), or the advantage function <i>A</i>(<i>a</i>,<i>s</i>) = <span class="equation-inline"><i>Q</i>(<i>s</i>,<i>a</i>) − <i>V</i>(<i>s</i>)</span> (cumulative reward with subtracted state-dependent baseline [<a href="https://arxiv.org/abs/1602.01783" target="_blank">Mnih et al. 2016</a>], i.e. the advantage of taking the specific action <i>a</i> compared to the expectation over all possible actions, where action probabilities are given by the policy <i>π</i>(<i>a</i>|<i>s</i>)).<br /><br />The critic can be trained with one of the methods of Section 2.8, similarly to training to approximate the value function in value-based methods. The actor, on the other hand, can be trained such that the value of its policy, as assessed by the critic, is highest. However, the critic usually provides only an approximation of the true objective (i.e. of the expected future cumulative reward). As a consequence of this approximation, the gradient of the critic’s outputs with respect to policy parameters (for example, the parameters of the NN that represents the policy function), which is usually called the policy gradient, is typically biased in actor-critic methods. This bias implies that a perfectly trained actor might maximize the critic’s outputs but not necessarily the cumulative rewards in the actual environment. Yet, policy gradients in actor-critic methods often have lower variance compared to policy-based methods without a learned critic [<a href="http://incompleteideas.net/book/the-book-2nd.html" target="_blank">Sutton & Barto 2018</a>: Section 13.8]. A low variance in gradient estimates is known to be favorable for the number of training steps required to train a good agent [<a href="https://www.jmlr.org/papers/volume5/greensmith04a/greensmith04a.pdf" target="_blank">Greensmith et al. 2004</a>].<br /><br />Note that actions in actor-critic methods are obtained from a freely parameterized policy function without being “assessed” by an action-value function before execution. This assessment distinguishes actor-critic methods from value-based methods with approximate maximization and learned search procedure.',
+    
+    'MC':
+    'Monte Carlo (MC) algorithms learn the value functions from cumulative rewards observed during entire sampled trajectories. Therefore, the parameters of the value function can only be updated after completed trajectories. The sample mean of the cumulative rewards obtained from multiple sampled episodes is an unbiased estimator of the expectation of the cumulative reward [<a href="http://incompleteideas.net/book/the-book-2nd.html" target="_blank">Sutton & Barto 2018</a>: Section 5]. It can, therefore, be used for learning the value function in a supervised manner.',
+    
+    'TD':
+    'One-step bootstrapping algorithms are often summarized under the term temporal-difference (TD) learning. Instead of observing cumulative rewards of entire episodes, a bootstrapping target (in the sense of an “output target”) for the value function estimator is created from the last observed reward and an approximation of the value function calculated with the current parameterization (e.g. the current neural network), hence bootstrapped. As a simple example, assume we want to learn the discounted state-value function <i>V</i> for some fixed policy <i>π</i>. Then, a gradient-based TD update rule for the estimator <i>V<sub>ϕ</sub></i> is given by <span class="equation-display"><i>ϕ ← ϕ + α</i>(<i>r</i><sub><i>t</i>+1</sub> + <i>γV<sub>ϕ</sub></i>(<i>s</i><sub><i>t</i>+1</sub>) − <i>V<sub>ϕ</sub></i>(<i>s<sub>t</sub></i>))∇<i><sub>ϕ</sub>V<sub>ϕ</sub></i>(<i>s<sub>t</sub></i>),</span> where <i>α</i> is the learning rate and the transition <span class="equation-inline"><i>s</i><sub><i>t</i></sub> → <i>s</i><sub><i>t</i>+1</sub></span> is due to an action <span class="equation-inline"><i>a</i> ~ <i>π</i></span> [<a href="http://incompleteideas.net/book/the-book-2nd.html" target="_blank">Sutton & Barto 2018</a>: Section 9].',
+    
+    'Per-state entropy regularization':
+    snippets['per-state'],
+    
+    'Soft Q-learning':
+    'While per-state entropy regularization enhances the entropy of the policy at the current state <i>s<sub>t</sub></i>, soft Q-learning [<a href="https://arxiv.org/abs/1702.08165" target="_blank">Haarnoja et al. 2017</a>, <a href="https://arxiv.org/abs/1702.08892" target="_blank">Nachum et al. 2017</a>] aims at enhancing the entropy of entire policy trajectories, i.e. <span class="equation-inline">&Sigma;<i><sub>t</sub></i> H(<i>π<sub>θ</sub></i>( · | <i>s<sub>t</sub></i>))</span>, by considering the expected future cumulative entropy in addition to the rewards.',
+    
+    'Kullback–Leibler divergence regularization':
+    snippets['KL'],
+    
+    'Per-state entropy and Kullback–Leibler divergence regularization':
+    snippets['per-state']+'<br /><br />'+snippets['KL'],
+    
+    'Mutual-information regularization':
+    'Mutual information (MI) between states and latent variables can also be used as an entropy regularizer. In this algorithm, maximization of the MI yields a diverse set of skills in a hierarchical policy. More precisely, in this case, the policy <span class="equation-inline"><i>π<sub>θ</sub></i>( · | <i>s<sub>t</sub> , c</i>)</span> depends on the current state <i>s<sub>t</sub></i> and a hierarchically higher skill, represented as latent variable <i>c</i>. While <span class="equation-inline">&Eta;(<i>π<sub>θ</sub></i>( · | <i>s<sub>t</sub></i>))</span> is intractable due to the integration over <i>c</i>, the MI given by <span class="equation-inline">&Eta;(<i>c</i>) − &Eta;(<i>c</i> | <i>s<sub>t</sub></i>)</span> can be computed. Note that the goal here is to have a unique action associated with a certain latent code (the entropy <span class="equation-inline">&Eta;(<i>c</i> | <i>s<sub>t</sub></i>)</span> needs to be reduced to this end), which is different from the goal of learning a diverse set of actions as in other regularizers). In general, MI regularization is probably most interesting if the policy’s entropy at the current state cannot be computed in closed form and if the policy can be conditioned on some latent variable model similar to the provided example. However, the application of MI regularization to a specific problem probably requires a very detailed examination of the policy (and potentially involved latent variables).',
+    
+    'No entropy regularization':
+    'Methods without entropy regularization do not incorporate the policy’s degree of randomness into the training objective, i.e. do not make additional efforts to improve exploration or to prevent early suboptimal convergence.',
+    
+    '': '' // no trailing comma in order to not confuse older browsers
+  };
+
+  // Create tooltip elements that will be visible when the mouse cursor hovers on table cells.
+  var tds = document.getElementsByTagName('td');
+  for (var i = 0; i < tds.length; i++) {
+    // skip first cell of each row
+    if (tds[i].parentNode.children[0] == tds[i]) {
+      continue;
+    }
+    methodProperty = tds[i].textContent;
+    var tooltip = document.createElement('div');
+    tooltip.className = 'tooltip';
+    var divForMethodPropertyExplanation = document.createElement('div');
+    divForMethodPropertyExplanation.className = 'tooltip-text';
+    if (methodProperty in methodPropertyExplanations) {
+      divForMethodPropertyExplanation.innerHTML = methodPropertyExplanations[methodProperty];
+    }
+    else if (eligibilityTracesNStep.indexOf(methodProperty)>=0) {
+      divForMethodPropertyExplanation.innerHTML = snippets['n-step etc'];
+    }
+    else {
+      divForMethodPropertyExplanation.textContent = "TODO add brief explanation of this method property to methodPropertyExplanations, maybe add 'read more' link to relevant section of our paper as per https://github.com/mozilla/pdf.js/wiki/Viewer-options, like https://arxiv.org/pdf/1710.10686.pdf#page=13&zoom=100,144,89 ";
+    }
+    tooltip.appendChild(divForMethodPropertyExplanation);
+    tds[i].appendChild(tooltip);
+    
+    // overdraw the border between a <td> and its own tooltip
+    var ductTape = document.createElement('div');
+    ductTape.className = 'duct-tape';
+    tds[i].appendChild(ductTape);
+  }
+  
+  update();
+});
+
+window.addEventListener('beforeunload', function (e) {
+  // Standard-compliant browsers
+  e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+
+  // For some older browsers
+  return 'You have unsaved changes. Are you sure you want to leave?';
+});
+
+function help(button) {
+  var targetElement = button.nextElementSibling;
+  if (targetElement) {
+    targetElement.classList.toggle('hidden');
+  }
+}
+
+function addClass(classToBeSelected, classToBeAdded) {
+    Array.from(document.getElementsByClassName(classToBeSelected)).forEach(element => element.classList.add(classToBeAdded));
+}
+
+function removeClass(classToBeSelected, classToBeRemoved) {
+    Array.from(document.getElementsByClassName(classToBeSelected)).forEach(element => element.classList.remove(classToBeRemoved));
+}
+</script>
+
+</body>
+</html>
